@@ -43,6 +43,11 @@ class ElasticsearchSearchBackend(BaseSearchBackend):
         'settings': {
             "analysis": {
                 "analyzer": {
+                    "trigger_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": ["standard", "lowercase", "trigger_delimiter", "stop", "snowball"]
+                    },
                     "ngram_analyzer": {
                         "type": "custom",
                         "tokenizer": "lowercase",
@@ -68,6 +73,11 @@ class ElasticsearchSearchBackend(BaseSearchBackend):
                     }
                 },
                 "filter": {
+                    "trigger_delimiter": {
+                        "type": "word_delimiter",
+                        "preserve_original": True,
+                        "split_on_numerics": False
+                    },
                     "haystack_ngram": {
                         "type": "nGram",
                         "min_gram": 3,
@@ -664,7 +674,7 @@ class ElasticsearchSearchBackend(BaseSearchBackend):
                 field_mapping["term_vector"] = "with_positions_offsets"
 
                 if not hasattr(field_class, 'facet_for') and not field_class.field_type in('ngram', 'edge_ngram'):
-                    field_mapping["analyzer"] = "snowball"
+                    field_mapping["analyzer"] = "trigger_analyzer"
 
             mapping[field_class.index_fieldname] = field_mapping
 
